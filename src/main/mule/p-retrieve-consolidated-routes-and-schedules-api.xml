@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    <apikit:config name="retrieveconsolidatedroutesandschedules-papi-config" api="resource::9e5fe96f-a281-4a54-ba12-7c1cbe04da7a:p-retrive-consolidated-routes-and-schedules-api:1.0.0:raml:zip:retrieveconsolidatedroutesandschedules-papi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="p-retrive-consolidated-routes-and-schedules-api-main">
+        <http:listener path="/api/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <logger level="INFO" doc:name="start flow" doc:id="3a99f372-5ebf-4b2a-b44e-908bb618982d" message="start flow" />
+		<apikit:router config-ref="retrieveconsolidatedroutesandschedules-papi-config" />
+		<error-handler ref="global-error-handlerError_Handler">
+            <!-- <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate> -->
+        </error-handler>
+    </flow>
+    <!-- <flow name="retrieveconsolidatedroutesandschedules-papi-console">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="retrieveconsolidatedroutesandschedules-papi-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow> -->
+    <flow name="get:\booking\(transportType)\routes:retrieveconsolidatedroutesandschedules-papi-config">
+        <!-- <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="transportType">attributes.uriParams.'transportType'</ee:set-variable>
+            </ee:variables>
+        </ee:transform> -->
+       <!--  <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+[
+  {
+    companyCode: "TransNational",
+    originLocation: {
+      locationCode: "BEN-SG",
+      locationDesc: "Beauna Vista Singapore"
+    },
+    destinationLocation: {
+      locationCode: "KLG-MY",
+      locationDesc: "Klang Malaysia"
+    }
+  }
+]]]></ee:set-payload>
+            </ee:message>
+        </ee:transform> -->
+		<flow-ref doc:name="call-routes-implementation" doc:id="9e2109d4-ee69-49b8-9a0e-1c6e25d4033f" name="get-consolidate-routes-implementationSub_Flow"/>
+    </flow>
+    <flow name="get:\booking\(transportType)\schedules:retrieveconsolidatedroutesandschedules-papi-config">
+       <!--  <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="transportType">attributes.uriParams.'transportType'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{
+  departureSchedules: [
+    {
+      availableSeats: 20,
+      departureDateTime: "2019-04-30T16:41:41",
+      travelRoute: {
+        destinationLocation: {
+          locationCode: "KLG-MY",
+          locationDesc: "Klang Malaysia"
+        },
+        originLocation: {
+          locationCode: "BEN-SG",
+          locationDesc: "Beauna Vista Singapore"
+        }
+      }
+    }, 
+    {
+      availableSeats: 30,
+      departureDateTime: "2019-04-30T18:41:41",
+      travelRoute: {
+        destinationLocation: {
+          locationCode: "KLG-MY",
+          locationDesc: "Klang Malaysia"
+        },
+        originLocation: {
+          locationCode: "BL-SG",
+          locationDesc: "Beauna Vista Singapore"
+        }
+      }
+    }
+  ]
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform> -->
+		<flow-ref doc:name="call-schedules-implementation" doc:id="67662f9e-6d50-4612-8b6b-3bd276f46120" name="get-consolidate-schedules-implementation"/>
+    </flow>
+</mule>

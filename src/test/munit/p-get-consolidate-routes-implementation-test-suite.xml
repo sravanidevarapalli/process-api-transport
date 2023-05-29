@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="p-get-consolidate-routes-implementation-test-suite.xml" />
+	<munit:test name="p-get-consolidate-routes-implementation-test-suite-get-routes-from-firstCoachTest" doc:id="7146a7af-ead2-4cac-8394-48a9cbff72d1" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when" doc:id="daf34c1c-6b40-4fb9-94e9-c4c9bdba3265" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="GET" attributeName="method" />
+					<munit-tools:with-attribute whereValue="call-sys-api-firstCoach" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('sample/input-payload.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="d1ef25ac-2582-425a-a7ca-13e1ea93df33" >
+				<munit:payload value="#[MunitTools::getResourceAsString('sample/input-payload.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="Flow-ref to get-routes-from-firstCoach" doc:id="a320fcf2-72a0-477f-9349-9b70ca819794" name="get-routes-from-firstCoach"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="fcfcbe0a-e8ea-4589-8faa-2fde2fee63eb" expression="#[payload]" is="#[MunitTools::notNullValue()]" message="empty payload"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

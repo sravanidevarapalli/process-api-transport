@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="get-routes-from-transNational" doc:id="022d634b-618b-4c5e-bc59-49f90df61dbe" >
+		<http:request method="GET" doc:name="call-sys-api-transNational-routes" doc:id="bf67b4d9-fca4-4a68-93a0-13a56f4fff82" config-ref="HTTP_Request_configuration-transNational" path="${http-request-transNational.path}" responseTimeout="1000000"/>
+		<logger level="INFO" doc:name="payload" doc:id="1299ba83-b94a-4d60-b329-ea28eee2d2c5" />
+		<ee:transform doc:name="mapping-data" doc:id="1ccdffc9-e284-4293-9cd8-2bda0ed97384" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var LocationDesc = (readUrl("classpath://examples/locationdescription.json","application/json"))
+---
+[payload map (value,index)->
+  {
+    companyCode: "TransNational",
+    originLocation: {
+      locationCode: value.originLocation.locationCode,
+      locationDesc: (LocationDesc filter($.locationcode == value.originLocation.locationCode))[0].locationdesc
+    },
+    destinationLocation: {
+      locationCode: value.destinationLocation.locationCode,
+      locationDesc: (LocationDesc filter($.locationcode == value.destinationLocation.locationCode))[0].locationdesc
+    }
+  }
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="get-consolidate-routes-from-both-transportProvider" doc:id="20716947-1175-462d-bafb-99f4e99ff210" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="87c74836-2d09-4603-b571-4f6fd98c5732" >
+			<route >
+				<flow-ref doc:name="call-routes-firstcoach-subflow" doc:id="dc6d2d50-7669-4bbe-9511-893539065923" name="get-routes-from-firstCoach"/>
+			</route>
+			<route >
+				<flow-ref doc:name="call-routes-transNational-subflow" doc:id="a95f0dc1-ffea-4249-80a9-035a4d9b7c87" name="get-routes-from-transNational"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="combined-output" doc:id="ef330599-acc7-4389-83eb-6af51a7cb097" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"firstCoach" : payload."0".payload,
+	"transnational" : payload."1".payload
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7bb8488e-d71f-4585-a887-63a6b063e13a" message="#[payload]"/>
+	</sub-flow>
+	<sub-flow name="get-consolidate-routes-implementationSub_Flow" doc:id="248a5f83-1425-41c1-8c00-d5de96b08ae1" >
+		<choice doc:name="Choice" doc:id="193c1cb4-4ed4-49f2-867f-2a1f15645ef6" >
+			<when expression="#[attributes.queryParams.companyCode == 'firstCoach']">
+				<flow-ref doc:name="call-routes-firstCoach-subflow" doc:id="d8d28012-623e-4477-9e99-db1b6171d7aa" name="get-routes-from-firstCoach"/>
+			</when>
+			<when expression="#[attributes.queryParams.companyCode == 'transNational']">
+				<flow-ref doc:name="call-routes-transNational-subflow" doc:id="60e98bc8-7485-4ccb-900b-60cba0667f61" name="get-routes-from-transNational"/>
+			</when>
+			<otherwise >
+				<flow-ref doc:name="call-scatter-gather-subflow" doc:id="b1517350-f26f-4e3e-bc94-97e7a454ff6d" name="get-consolidate-routes-from-both-transportProvider"/>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="payload" doc:id="195fe8ed-ba82-474f-98dd-c7aada10f436" message="#[payload]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="096bf18a-6e07-4c27-95be-bf01827b1b77" message="end the process-api-routes"/>
+	</sub-flow>
+	<sub-flow name="get-routes-from-firstCoach" doc:id="1d18eb9b-9009-416e-8def-d91bdb30f4f1" >
+		<http:request method="GET" doc:name="call-sys-api-firstCoach" doc:id="35f3a77d-ba00-4897-bf05-b3ac9b1a3c0b" config-ref="HTTP_Request_configuration" responseTimeout="100000" path="${http-request-firstCoach.path}"/>
+		<logger level="INFO" doc:name="payload" doc:id="080c09ac-4831-45c7-ac59-cdfd8989e66d" message="#[payload]"/>
+		<ee:transform doc:name="mapping-data" doc:id="e8a02b06-ccc4-4f8a-9a73-b0cd36f2aa02" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var LocationDesc = (readUrl("classpath://examples/locationdescription.json","application/json"))
+---
+[payload map (value,index)->
+  {
+    companyCode: "FirstCoach",
+    originLocation: {
+      locationCode: value.originLocation.locationCode,
+      locationDesc: (LocationDesc filter($.locationcode == value.originLocation.locationCode))[0].locationdesc
+    },
+    destinationLocation: {
+      locationCode: value.destinationLocation.locationCode,
+      locationDesc: (LocationDesc filter($.locationcode == value.destinationLocation.locationCode))[0].locationdesc
+    }
+  }
+]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

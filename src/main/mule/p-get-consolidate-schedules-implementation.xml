@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="get-consolidate-schedules-implementation" doc:id="9ef12e54-2dba-4788-92a9-b1017947cd14" >
+		<choice doc:name="Choice" doc:id="28f18036-34a4-4e0c-86fb-aaec26bb9070">
+			<when expression="#[attributes.queryParams.companyCode == 'firstCoach']">
+				<flow-ref doc:name="call-firstCoach-routes" doc:id="4401fd75-d31f-48bd-b4f6-82a9ef3e9e5d" name="get-schedules-implementation" />
+			</when>
+			<when expression="#[attributes.queryParams.companyCode == 'transNational']">
+				<ee:transform doc:name="return empty payload" doc:id="acdbaa8b-40fa-4d8d-b6cf-d26503d6d701">
+					<ee:message>
+						<ee:set-payload><![CDATA["schedules doesn't provide by transNational" ]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="8a82e925-aebd-4e0d-9817-5ea266d74a86" message="schedules doesn't provide by transNational"/>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="no companyCode" doc:id="90fae6e9-b4fa-4933-b19c-c8ceed4b60d5">
+					<ee:message>
+						<ee:set-payload><![CDATA["no companyCode"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="end flow" doc:id="63d242fc-decb-42c3-9642-424deaf98ae9" message="end flow"/>
+	</sub-flow>
+	<sub-flow name="get-schedules-implementation" doc:id="0afd34bf-706c-447c-ad34-5b5d4d0d2ed9" >
+		<http:request method="GET" doc:name="call-sys-api-firstCoach" doc:id="3b6b8fd2-fcc4-4a4c-9c70-de6320e9f50b" config-ref="HTTP_Request_configuration" path="${http-request-firstCoach.path1}" responseTimeout="10000000">
+			<http:query-params ><![CDATA[#[output application/java
+---
+{
+	"departureLocationCode" : attributes.queryParams.departureLocationCode,
+	"destinationLocationCode" : attributes.queryParams.destinationLocationCode
+}]]]></http:query-params>
+		</http:request>
+		<logger level="INFO" doc:name="payload" doc:id="f3dacc8d-2e2b-45e5-9e75-610f71c800a8" message="#[payload]"/>
+		<ee:transform doc:name="mapping the data" doc:id="364f19a0-f3ce-40f7-9072-916b5cefe227">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var LocationDesc = (readUrl("classpath://examples/locationdescription.json","application/json"))
+---
+{
+  departureSchedules:  payload.departureSchedules map((value,index) -> {
+      availableSeats: value.availableSeats,
+      departureDateTime: value.departureDateTime,
+      travelRoute: {
+        destinationLocation: {
+          locationCode: value.travelRoute.destinationLocation.locationCode,
+          locationDesc: (LocationDesc filter($.locationcode == value.travelRoute.destinationLocation.locationCode))[0].locationdesc
+        },
+        originLocation: {
+          locationCode: value.travelRoute.originLocation.locationCode,
+          locationDesc: (LocationDesc filter($.locationcode == value.travelRoute.originLocation.locationCode))[0].locationdesc
+        }
+      }
+    }
+    )
+  }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="end-flow" doc:id="c88d63af-6c6a-47d8-8aeb-f683cc688c93" message="End flow"/>
+	</sub-flow>
+</mule>

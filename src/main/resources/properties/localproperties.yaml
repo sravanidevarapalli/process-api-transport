@@ -1,0 +1,17 @@
+#http-configuration-process
+htttp:
+  port: '8083'
+  path: '/api/*'
+  
+#http-request-configuration for firstcoach
+http-request-firstCoach:
+  port: '8081'
+  host: 'localhost'
+  path: '/api/uber/firstcoach/routes' 
+  path1: '/api/kingfisher-airways/firstcoach/schedules'
+#http-request-configuration for transnational
+http-request-transNational:
+ port: '8082'
+ host: 'localhost'
+ path: '/api/uber/transnational/routes'
+   

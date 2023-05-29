@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="4ed7a854-cc3c-4829-87fb-35a23d784d66" >
+		<http:request-connection host="${http-request-firstCoach.host}" port="${http-request-firstCoach.port}" connectionIdleTimeout="100000"/>
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="6ca87f7c-3f0a-44b4-80a6-3e996ef820c8" file="properties\localproperties.yaml" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="12abf799-c1a2-4681-a0ee-a670add63415" >
+		<http:listener-connection host="0.0.0.0" port="8083" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration-transNational" doc:name="HTTP Request configuration" doc:id="538af00f-3600-41b9-b491-280c120afb06" >
+		<http:request-connection host="${http-request-transNational.host}" port="${http-request-transNational.port}" connectionIdleTimeout="100000"/>
+	</http:request-config>
+	<configuration doc:name="Configuration" doc:id="b0ce624a-39f3-4a65-8879-1f324132cfc6" defaultErrorHandler-ref="global-error-handlerError_Handler" />
+</mule>

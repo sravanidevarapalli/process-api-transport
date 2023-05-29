@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<error-handler name="global-error-handlerError_Handler" doc:id="39065a1f-9e28-40ed-bafd-19cbd72e117b" >
+    <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <set-variable value="400" doc:name="httpstatus code" doc:id="9fc8f83c-5bb7-4563-b262-fc42b9349b67" variableName="status"/>
+			<set-variable value="BAD REQUEST" doc:name="http status message" doc:id="3dc149a5-1953-4996-8ee7-8dfaf639fa4f" variableName="message"/>
+			<ee:transform doc:name="error message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statusCode: vars.status,
+	message: vars.message
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[400]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+			<set-variable value="404" doc:name="http status code" doc:id="c0ec3943-17d1-461f-8c79-465145d1b868" variableName="status" />
+			<set-variable value="Resource Not found" doc:name="http status message" doc:id="6f3708ef-4861-4fc6-9414-718b82cc3893" variableName="message" />
+			<ee:transform doc:name="error message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statuscode: vars.status,
+	message: vars.message
+	}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[404]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+			<set-variable value="405" doc:name="http status code" doc:id="468b50ae-e7f1-4ec8-bdf8-83f1e69da523" variableName="status" />
+			<set-variable value="#[error.description]" doc:name="http status message" doc:id="9d2abdd6-c275-46d0-974d-c6c08dbc84c2" variableName="message" />
+			<ee:transform doc:name="error message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statuscode: vars.status,
+	message: vars.message
+	}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[405]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+			<set-variable value="406" doc:name="http status code" doc:id="4b60e87f-5628-443c-ab61-8c732793fbdd" variableName="status" />
+			<set-variable value="#[error.description]" doc:name="http status message" doc:id="0521cce1-3169-4a34-9c30-5ca708681c62" variableName="message" />
+			<ee:transform doc:name="error message" doc:id="737c0386-154c-4142-b556-5196bb43af41" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statuscode: vars.status,
+	message: vars.message
+	}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[405]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+			<set-variable value="415" doc:name="http status code" doc:id="89ad6d5c-ee9b-4f29-b3ed-f043ce072fa0" variableName="status" />
+			<set-variable value="#[error.description]" doc:name="http status message" doc:id="effe303e-f090-409d-a9c5-b89908879a7d" variableName="message" />
+			<ee:transform doc:name="error message" doc:id="87567c6b-5d9d-4bb3-ab84-5f5fdd40225d" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statuscode: vars.status,
+	message: vars.message
+}]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="httpStatus" ><![CDATA[405]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+            
+</on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+			<set-variable value="501" doc:name="http status code" doc:id="58bf244c-5ea2-4834-85cc-a4b3b32116d9" variableName="status" />
+			<set-variable value="#[error.description]" doc:name="http status message" doc:id="49b572a0-d8d8-48a6-be96-20d20918ab1e" variableName="message" />
+			<ee:transform doc:name="error message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	statuscode: vars.status,
+	message: vars.message
+}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus"><![CDATA[501]]></ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            
+</on-error-propagate>
+            </error-handler>
+</mule>
